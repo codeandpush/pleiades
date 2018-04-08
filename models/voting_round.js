@@ -7,6 +7,7 @@ class VotingRound extends DbObject {
     
     static columnDefs(DataTypes) {
         return {
+            roundId: DataTypes.INTEGER,
             roomId: DataTypes.INTEGER,
             startTime: DataTypes.DATE
         }
