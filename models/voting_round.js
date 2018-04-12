@@ -13,13 +13,24 @@ class VotingRound extends DbObject {
     }
 
     winner(){
-        return 'Haminata Vintu Camara Camara Camara'
+        return this.getVotes()
+            .then((votes) => {
+                return votes[0].getSong()
+            })
     }
 
-    static associate(model){
+    static associate(models){
         // has many votes
         // belongs to room
         // has many songs
+
+        models.VotingRound.belongsTo(models.MusicRoom, {
+            foreignKey: 'roomId', as: 'room'
+        })
+
+        models.VotingRound.hasMany(models.Vote, {
+            foreignKey: 'roundId', as: 'votes'
+        })
     }
     
 }

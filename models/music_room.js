@@ -7,7 +7,8 @@ class MusicRoom extends DbObject {
     
     static columnDefs(DataTypes) {
         return {
-            createdById: DataTypes.INTEGER
+            createdById: DataTypes.INTEGER,
+            name: DataTypes.STRING,
         }
     }
 
@@ -16,6 +17,19 @@ class MusicRoom extends DbObject {
     addSong(song){
         const models = require('../models')
         return models.RoomSong.create({roomId: this.id, songId: song.id})
+    }
+
+    getSongs(){
+        const models = require('../models').sequelize.models
+        let options = {include:[{model: models.Song, as: 'song'}],
+            where: {
+                roomId: this.get('id')
+            }
+        }
+        return models.RoomSong.findAll(options)
+            .then((rSongs) => {
+                return rSongs.map(rs => rs.song)
+            })
     }
 
     static associate(models){
