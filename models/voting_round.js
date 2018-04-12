@@ -7,7 +7,6 @@ class VotingRound extends DbObject {
     
     static columnDefs(DataTypes) {
         return {
-            roundId: DataTypes.INTEGER,
             roomId: DataTypes.INTEGER,
             startTime: DataTypes.DATE
         }
@@ -15,6 +14,12 @@ class VotingRound extends DbObject {
 
     winner(){
         return 'Haminata Vintu Camara Camara Camara'
+    }
+
+    static associate(model){
+        // has many votes
+        // belongs to room
+        // has many songs
     }
     
 }

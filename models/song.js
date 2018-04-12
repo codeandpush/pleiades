@@ -18,7 +18,7 @@ class Song extends DbObject {
     }
     
     static associate(models) {
-    
+
     }
 }
 
