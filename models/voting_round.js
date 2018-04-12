@@ -12,6 +12,10 @@ class VotingRound extends DbObject {
             startTime: DataTypes.DATE
         }
     }
+
+    winner(){
+        return 'Haminata Vintu Camara Camara Camara'
+    }
     
 }
 
