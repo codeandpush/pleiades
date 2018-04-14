@@ -12,12 +12,22 @@ class VotingRound extends DbObject {
         }
     }
 
+    getVotes() {
+        return Vote.findAll({where: {roundId: this.id} })
+    }
+
     winner(){
         return this.getVotes()
             .then((votes) => {
-                return votes[0].getSong()
+                var voteTally = votes.reduce(function(tally, vote) {
+                    tally[vote.songId] = (tally[vote.songId] || 0) + 1;
+                    return tally;
+                }, {});
+                var songWithMostVote = Object.keys(voteTally).reduce(function(a, b){ return voteTally[a] > voteTally[b] ? a : b });
+                return parseInt(songWithMostVote)
             })
     }
+
 
     static associate(models){
         // has many votes
