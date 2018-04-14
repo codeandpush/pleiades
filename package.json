@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/codeandpush/pleiades#readme",
   "dependencies": {
-    "bkendz": "latest",
+    "bkendz": "file:../bkendz",
     "bluebird": "^3.5.1",
     "del": "^3.0.0",
     "epa": "^0.2.1",
