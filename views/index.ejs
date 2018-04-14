@@ -8,118 +8,14 @@
     <link rel="icon" type="image/png" href="images/playthis_logo.png"/>
     <title>PlayThis</title>
 
-    <!-- reference the ag-Grid library-->
-    <script src="https://unpkg.com/ag-grid/dist/ag-grid.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://unpkg.com/eventemitter3@latest/umd/eventemitter3.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <style>
-        html {
-            width: 100%;
-            height: 100%;
-        }
-
-        body {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        #connection_alert {
-            display: none;
-        }
-
-        event-terminal:not(:defined) {
-            display: inline-block;
-            height: 100vh;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            background-color: hotpink;
-        }
-
-        event-terminal {
-            height: 40px;
-            width: 200px;
-        }
-
-        #navbar {
-            padding-bottom: 50px;
-            position: relative;
-            z-index: 999;
-            //min-height: 80px;
-            width: 100%;
-            background-color: transparent;
-        }
-
-        #navbar > nav {
-            position: absolute;
-            z-index: 1000;
-            width: 100%;
-            bottom: -110px;
-            transition: all 0.25s ease;
-            transition-delay: 0.3s;
-        }
-
-        #navbar:hover > nav {
-            position: absolute;
-            width: 100%;
-            bottom: 10px;
-        }
-
-        main {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: whitesmoke;
-        }
-
-        #slides_container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            background-color: black;
-            color: ghostwhite;
-        }
-
-        i {
-            border: solid rgba(255,255,255,0.5);
-            border-width: 0 3px 3px 0;
-            display: inline-block;
-            padding: 3px;
-        }
-
-        .right {
-            transform: rotate(-45deg);
-            -webkit-transform: rotate(-45deg);
-        }
-
-        .left {
-            transform: rotate(135deg);
-            -webkit-transform: rotate(135deg);
-        }
-
-        .up {
-            transform: rotate(-135deg);
-            -webkit-transform: rotate(-135deg);
-        }
-
-        .down {
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-        }
-    </style>
 </head>
 <body data-emit-keyup="stage" style="position: relative">
 
@@ -130,9 +26,9 @@
 </div>
 
 
-<main >
-    <div class="container" style="margin-top: 16%">
-        <div class="row" id="presentations">
+<main style="height: 100%">
+    <div class="container">
+        <div class="row">
             <div class="col-md-8 col-md-offset-4">
                 <h1>PlayThis</h1>
             </div>
@@ -146,6 +42,10 @@
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous"></script>
 
+<script src="dist/bkendz.js"></script>
 <script src="js/app.js"></script>
+<script>
+    app.main()
+</script>
 </body>
 </html>

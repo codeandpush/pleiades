@@ -1,1 +1,0 @@
-IN PROGRESS - client-side app class setup

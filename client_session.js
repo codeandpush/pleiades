@@ -8,19 +8,24 @@ const path = require('path')
 SessionHandler.DEFAULT_API_URL = '//localhost:64321'
 
 class ClientSession extends SessionHandler {
-
-    onMessage(topic, request){
-        console.log('Client recieved...', request)
+    
+    static supportedTopics() {
+        return ['/']
     }
-
+    
+    onMessage(topic, request, src) {
+        console.log(`[${this.constructor.name}#onMessage] topic=%s, source=%s`, topic, src)
+        switch (topic) {
+            case '/':
+                return {render: ['index']}
+        }
+    }
+    
 }
 
-const client = new ClientSession({staticPath: path.resolve(__dirname, './src')})
-
-client.messageHandlers.http.set('views', path.resolve(__dirname, './views'))
-
-client.messageHandlers.http.get('/', (req, res) => {
-    res.render('index')//, {elemName: 'TEST!!!'})
+const client = new ClientSession({
+    staticPath: path.resolve(__dirname, './src'),
+    viewPath: path.resolve(__dirname, './views')
 })
 
 module.exports = {ClientSession, default: client}
