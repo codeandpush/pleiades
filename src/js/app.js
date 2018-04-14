@@ -43,4 +43,8 @@ app.on('api_disconnected', () => {
 
 app.on('api_connected', () => {
     console.log('api connected')
+    
+    app.api.on('db_update', (snapshot) => {
+        console.log('[db_update]', snapshot)
+    })
 })
