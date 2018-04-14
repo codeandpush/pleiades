@@ -13,6 +13,9 @@ class PleiadesApp extends Bkendz {
             connectionAlert: $('#connection_alert')
         }
     }
+
+    get role(){}
+
     
 }
 
