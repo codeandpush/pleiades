@@ -19,9 +19,9 @@ class VotingRound extends DbObject {
                     tally[vote.songId] = (tally[vote.songId] || 0) + 1;
                     return tally;
                 }, {});
-                let songWithMostVote = Object.keys(voteTally).reduce(function(a, b){ return voteTally[a] > voteTally[b] ? a : b });
+                let idWithMostVotes = Object.keys(voteTally).reduce(function(a, b){ return voteTally[a] > voteTally[b] ? a : b });
                 let models = require('../models')
-                return models.Song.findById(parseInt(songWithMostVote))
+                return models.Song.findById(parseInt(idWithMostVotes))
             })
     }
 
