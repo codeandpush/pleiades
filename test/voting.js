@@ -41,7 +41,7 @@ describe('voting', () => {
                     models.Vote.create({roundId: vr.id, voterId: users[1].id, songId: songs[0].id}),
                 ]
                 let tl = [models.Vote.create({roundId: vr.id, voterId: users[3].id, songId: songs[1].id}),
-                    models.Vote.create({roundId: vr.id, voterId: users[4].id, songId: songs[1].id}),
+                    models.Vote.create({roundId: vr.id, voterId: users[4].id, songId: songs[0].id}),
                 ]
                 let mg = [models.Vote.create({roundId: vr.id, voterId: users[2].id, songId: songs[2].id}),
                 ]
