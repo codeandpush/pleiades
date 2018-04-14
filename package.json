@@ -9,7 +9,7 @@
     "start-admin": "NODE_ENV=development STANDALONE=true BZ_PROCESS_NAME=admin node server.js",
     "sync-models-clean": "NODE_ENV=development gulp sync:models:clean",
     "sync-models-seed": "NODE_ENV=development gulp sync:models:seed",
-    "postinstall": "NODE_ENV=development gulp sync:models:seed",
+    "postinstallx": "NODE_ENV=development gulp sync:models:seed",
     "bz-local": "NODE_ENV=development gulp bz:local",
     "test": "NODE_ENV=test mocha"
   },
@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/codeandpush/pleiades#readme",
   "dependencies": {
-    "bkendz": "latest",
+    "bkendz": "file:../bkendz",
     "bluebird": "^3.5.1",
     "del": "^3.0.0",
     "epa": "^0.2.1",

@@ -5,9 +5,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .idea
-/db/migrations/*
-/db/db.*.sqlite
-models/index.js
+api/db/migrations/*
+api/db/db.*.sqlite
+api/models/index.js
+
+db
+models
 
 # Runtime data
 pids

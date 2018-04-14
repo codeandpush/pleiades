@@ -3,8 +3,8 @@
  */
 const bz = require('bkendz')
 const _ = require('lodash')
-const clientSession = require('./client_session')
-const apiSession = require('./api_session')
+const clientSession = require('./session')
+const apiSession = require('./api/session')
 
 const app = new bz.Bkendz({
     enableOnly: process.env.BZ_PROCESS_NAME || bz.Bkendz.PROCESS_NAME_CLIENT,
