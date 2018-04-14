@@ -10,7 +10,7 @@ SessionHandler.DEFAULT_API_URL = '//localhost:64321'
 class ClientSession extends SessionHandler {
     
     static supportedTopics() {
-        return ['/']
+        return ['/', '/room/admin/votingtally']
     }
     
     onMessage(topic, request, src) {
@@ -18,6 +18,9 @@ class ClientSession extends SessionHandler {
         switch (topic) {
             case '/':
                 return {render: ['index']}
+
+            case '/room/admin/votingtally':
+                return {render: ['vote_status']}
         }
     }
     
