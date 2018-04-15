@@ -88,7 +88,6 @@ app.on('click_admin', (e)=>{
     let getTemplate = app.getTemplate('_upload_playlist.ejs')
     return Promise.all([getTemplate])
         .then(([template]) => {
-            console.log(template);
             app.elems.songsContainer.html(template)
         })
 })

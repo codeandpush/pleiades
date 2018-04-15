@@ -8,7 +8,7 @@ const _ = require('lodash')
 class ApiSession extends ApiSessionHandler {
     
     static supportedTopics(){
-        return ['/fetch',]
+        return ['/fetch']
     }
     
     onMessage(topic, request){
@@ -17,7 +17,7 @@ class ApiSession extends ApiSessionHandler {
                 let model = request.model
                 let where = request.where || {}
                 
-                if(!(model in this.models)) throw new Error(`Unkown model: ${model}`)
+                if(!(model in this.models)) throw new Error(`Unknown model: ${model}`)
                 
                 return this.models[model].findAll({where: where})
                     .then((rooms) => {
@@ -30,17 +30,14 @@ class ApiSession extends ApiSessionHandler {
         console.log(`[${this.constructor.name}] seeding database`)
         return require('./db_seed')({models: this.models})
     }
-
-    setupBasicMiddleware(){
-        console.log("Setting up API middleware")
-        this.messageHandlers.http.get('/api/room/:id/songs', function(req, res, next) {
-            return [{song:"bank alert"},]
-        })
-        super.setupBasicMiddleware()
-    }
+    
 }
 
 let api = new ApiSession()
+
+api.messageHandlers.http.get('/api/room/:id', function(req, res, next) {
+    return res.json([{song:"bank alert"},])
+})
 
 const wsHandler = api.messageHandlers.ws
 
@@ -51,7 +48,7 @@ wsHandler.on('db_update', (updates) => {
 })
 
 wsHandler.on('subscription_added', (subject) => {
-    console.log('sending snapshot')
+    console.log(`[${api.constructor.name}#subscription_added] sending snapshot`)
     let models = api.models
     
     _.each(models, (cls, modelName) => {

@@ -3,39 +3,43 @@
  */
 const _ = require('lodash')
 
-module.exports = function (opts) {
+const USERS = [
+    {nickname: 'hvcc'},
+    {nickname: 'chinwo'},
+    {nickname: 'obi'},
+    {nickname: 'hawa'},
+    {nickname: 'cori'},
+]
+
+const SONGS = [
+    {title: 'Shayo', name: 'shayo', artistName: 'Bigiano'},
+    {title: 'True Love', name: 'true_love', artistName: 'TuFace'},
+    {title: 'Mel Gibson', name: 'mel_gibson', artistName: 'Scotland'},
+]
+
+const MUSIC_ROOMS = [{createdById: null, name: 'Obi & Nkem Efulu\'s Wedding'}]
+const VOTING_ROUNDS = [{startTime: new Date(), roomId: null}]
+
+module.exports = function fn(opts) {
     opts = opts || {}
     let models = opts.models
     
     return Promise.resolve()
         .then(() => {
-            let amina = models.User.create({nickname: 'hvcc'})
-            let chinwo = models.User.create({nickname: 'chinwo'})
-            let obi = models.User.create({nickname: 'obi'})
-            let hawa = models.User.create({nickname: 'hawa'})
-            let cori = models.User.create({nickname: 'cori'})
-            return Promise.all([amina, chinwo, obi, hawa, cori])
+            return Promise.all(USERS.map((user) => models.User.create(user)))
         })
         .then((users) => {
             
-            let bs = models.Song.create({name: 'Shayo', artistName: 'Bigiano'})
-            let tl = models.Song.create({name: 'True Love', artistName: 'TuFace'})
-            let mg = models.Song.create({name: 'Mel Gibson', artistName: 'Scotland'})
-            
-            let room = models.MusicRoom.create({
-                createdById: users[0].id,
-                name: 'Obi & Nkem Efulu\'s Wedding'
-            })
-            
-            return Promise.all([room, Promise.all([bs, tl, mg]), users])
+            let room = models.MusicRoom.create(_.merge({}, MUSIC_ROOMS[0], {createdById: users[0].id}))
+            return Promise.all([room, Promise.all(SONGS.map(s => models.Song.create(s))), users])
         })
         .then(([room, songs, users]) => {
             
             songs.forEach((song) => {
                 room.addSong(song)
             })
-            
-            return Promise.all([models.VotingRound.create({roomId: room.id, startTime: new Date()}), songs, users])
+            let round = models.VotingRound.create(_.merge({}, VOTING_ROUNDS[0], {roomId: room.id, startTime: new Date()}))
+            return Promise.all([round, songs, users])
         })
         .then(([vr, songs, users]) => {
             let bs = [models.Vote.create({roundId: vr.id, voterId: users[0].id, songId: songs[0].id}),
