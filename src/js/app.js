@@ -92,3 +92,27 @@ app.on('click_admin', (e)=>{
             app.elems.songsContainer.html(template)
         })
 })
+
+app.on('change_fileSelected', (evt)=>{
+    var files = evt.target.files
+    for (var i = 0, f; f = files[i]; i++) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var csvString = reader.result;
+            console.log(Papa.parse(csvString))
+            let getTemplate = app.getTemplate('playlist.ejs')
+
+            return Promise.all([getTemplate])
+                .then(([songs, template]) => {
+                    let compiled = _.template(template)
+                    _.each(songs, (song) => {
+                        let el = $(compiled({song}))
+                        app.elems.songsContainer.append(el)
+                    })
+                })
+        }
+        reader.readAsText(f, 'UTF-8');
+    }
+})
+
+app.debugMode = true
