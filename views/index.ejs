@@ -10,7 +10,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js"></script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -33,99 +33,25 @@
                 <div class="container">
                     <div class="navbar-brand">
                         <a class="navbar-item">
-                            <p class="title is-2">Pleiades</p>
+                            <p class="title is-4">Pleiades</p>
                         </a>
-                        <span class="navbar-burger burger" data-target="navbarMenuHeroB">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                          </span>
+                        <i class="fa fa-music" aria-hidden="true" data-emit-click="admin"></i>
                     </div>
-                    <div id="navbarMenuHeroB" class="navbar-menu">
-                        <div class="navbar-end">
-                            <a class="navbar-item is-active">
-                                Home
-                            </a>
-                            <a class="navbar-item">
-                                Examples
-                            </a>
-                            <a class="navbar-item">
-                                Documentation
-                            </a>
-                            <span class="navbar-item">
-              <a class="button is-info is-inverted">
-                <span class="icon">
-                  <i class="fab fa-github"></i>
-                </span>
-                <span>Download</span>
-              </a>
-            </span>
-                        </div>
+                </div>
+
+                <div class="hero-body" data-emit-click="admin" >
+                    <div class="container">
+                        <p class="title is-4">Some Random Event.</p>
                     </div>
                 </div>
             </nav>
         </div>
+    </section>
 
-        <div class="hero-body">
-            <div class="container has-text-centered">
-                <p class="title">
-                    Title
-                </p>
-                <p class="subtitle">
-                    Subtitle
-                </p>
-            </div>
-        </div>
-
-        <div class="hero-foot">
-            <nav class="tabs is-boxed is-fullwidth">
-                <div class="container">
-                    <ul>
-                        <li class="is-active">
-                            <a>Overview</a>
-                        </li>
-                        <li>
-                            <a>Modifiers</a>
-                        </li>
-                        <li>
-                            <a>Grid</a>
-                        </li>
-                        <li>
-                            <a>Elements</a>
-                        </li>
-                        <li>
-                            <a>Components</a>
-                        </li>
-                        <li>
-                            <a>Layout</a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-    </section>
     <section>
-        <div class="container">
-            <p class="title is-2">Obi & Nkem Efulu's Wedding</p>
-            <p class="subtitle is-4">Round One</p>
+        <div class="container" id="appContainer">
         </div>
     </section>
-    <section>
-        <div class="container" id="songs">
-        </div>
-    </section>
-    <footer class="footer">
-        <div class="container">
-            <div class="content has-text-centered">
-                <p>
-                    <strong>Bulma</strong> by <a href="https://jgthms.com">Jeremy Thomas</a>. The source code is
-                    licensed
-                    <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
-                    is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
-                </p>
-            </div>
-        </div>
-    </footer>
 </main>
 
 

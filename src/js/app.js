@@ -12,7 +12,8 @@ class PleiadesApp extends Bkendz {
     get elems() {
         return {
             connectionAlert: $('#connection_alert'),
-            songsContainer: $('#songs')
+            songsContainer: $('#appContainer'),
+            playlistContainer: $('#appContainer')
         }
     }
 
@@ -76,5 +77,18 @@ app.on('changed_dbschema', () => {
                 let el = $(compiled({song}))
                 app.elems.songsContainer.append(el)
             })
+        })
+})
+
+app.on('click_song', (e)=>{
+    console.log('song clicked')
+})
+
+app.on('click_admin', (e)=>{
+    let getTemplate = app.getTemplate('_upload_playlist.ejs')
+    return Promise.all([getTemplate])
+        .then(([template]) => {
+            console.log(template);
+            app.elems.songsContainer.html(template)
         })
 })

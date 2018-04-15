@@ -28,7 +28,15 @@ class ApiSession extends ApiSessionHandler {
     
     onListening(){
         console.log(`[${this.constructor.name}] seeding database`)
-        //return require('./db_seed')({models: this.models})
+        return require('./db_seed')({models: this.models})
+    }
+
+    setupBasicMiddleware(){
+        console.log("Setting up API middleware")
+        this.messageHandlers.http.get('/api/room/:id/songs', function(req, res, next) {
+            return [{song:"bank alert"},]
+        })
+        super.setupBasicMiddleware()
     }
 }
 
