@@ -89,24 +89,34 @@ app.on('click_admin', (e)=>{
     return Promise.all([getTemplate])
         .then(([template]) => {
             app.elems.songsContainer.html(template)
+            let compiled = _.template(template)
+            _.each([], (song) => {
+                let el = $(compiled({song}))
+                app.elems.songsContainer.append(el)
+            })
         })
 })
 
 app.on('change_fileSelected', (evt)=>{
-    var files = evt.target.files
-    for (var i = 0, f; f = files[i]; i++) {
-        var reader = new FileReader();
+    let files = evt.target.files
+    for (let i = 0, f; f = files[i]; i++) {
+        let reader = new FileReader();
         reader.onload = function (e) {
-            var csvString = reader.result;
-            console.log(Papa.parse(csvString))
+            let csvString = reader.result;
+            let songs = Papa.parse(csvString).data.map(elem => {
+                   return { artistName: elem[0],
+                    name: elem[1],
+                    title: elem[1]}
+                })
             let getTemplate = app.getTemplate('playlist.ejs')
+            let playlistElem = $('#playlist')
 
-            return Promise.all([getTemplate])
+            return Promise.all([Promise.resolve(songs), getTemplate])
                 .then(([songs, template]) => {
                     let compiled = _.template(template)
                     _.each(songs, (song) => {
                         let el = $(compiled({song}))
-                        app.elems.songsContainer.append(el)
+                        playlistElem.append(el)
                     })
                 })
         }
