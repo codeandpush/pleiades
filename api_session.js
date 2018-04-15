@@ -28,7 +28,6 @@ class ApiSession extends ApiSessionHandler {
     
     onListening(){
         console.log(`[${this.constructor.name}] seeding database`)
-        return require('./db_seed')({models: this.models})
     }
     
 }

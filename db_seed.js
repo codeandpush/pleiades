@@ -17,10 +17,28 @@ const SONGS = [
     {title: 'Mel Gibson', name: 'mel_gibson', artistName: 'Scotland'},
 ]
 
-const MUSIC_ROOMS = [{createdById: null, name: 'Obi & Nkem Efulu\'s Wedding'}]
-const VOTING_ROUNDS = [{startTime: new Date(), roomId: null}]
+const MUSIC_ROOMS = [{createdById: 1, name: 'Obi & Nkem Efulu\'s Wedding'}]
+const ROOM_SONGS = [
+    {songId: 1, roomId: 1},
+    {songId: 2, roomId: 1},
+    {songId: 3, roomId: 1},
+    ]
 
-module.exports = function fn(opts) {
+const VOTING_ROUNDS = [{startTime: new Date(), roomId: 1}]
+
+const VOTES = [
+    {roundId: 1, voterId: 1, songId: 1},
+    {roundId: 1, voterId: 2, songId: 1},
+    
+    {roundId: 1, voterId: 4, songId: 2},
+    {roundId: 1, voterId: 5, songId: 2},
+    
+    {roundId: 1, voterId: 3, songId: 3},
+]
+
+module.exports = {MUSIC_ROOMS, VOTING_ROUNDS, USERS, SONGS, VOTES, ROOM_SONGS}
+
+module.exports.seed = function fn(opts) {
     opts = opts || {}
     let models = opts.models
     
@@ -34,31 +52,13 @@ module.exports = function fn(opts) {
             return Promise.all([room, Promise.all(SONGS.map(s => models.Song.create(s))), users])
         })
         .then(([room, songs, users]) => {
+    
+            let roomSongs = Promise.all(ROOM_SONGS.map(roomSong => models.RoomSong.create(roomSong)))
             
-            songs.forEach((song) => {
-                room.addSong(song)
-            })
             let round = models.VotingRound.create(_.merge({}, VOTING_ROUNDS[0], {roomId: room.id, startTime: new Date()}))
-            return Promise.all([round, songs, users])
+            return Promise.all([round, songs, users, roomSongs])
         })
-        .then(([vr, songs, users]) => {
-            let bs = [models.Vote.create({roundId: vr.id, voterId: users[0].id, songId: songs[0].id}),
-                models.Vote.create({roundId: vr.id, voterId: users[1].id, songId: songs[0].id}),
-            ]
-            let tl = [models.Vote.create({roundId: vr.id, voterId: users[3].id, songId: songs[1].id}),
-                models.Vote.create({roundId: vr.id, voterId: users[4].id, songId: songs[0].id}),
-            ]
-            let mg = [models.Vote.create({roundId: vr.id, voterId: users[2].id, songId: songs[2].id}),
-            ]
-            
-            return Promise.all([vr, _.flatten(vr, bs, tl, mg)])
-        })
-        .then(([vr, votes]) => {
-            let proms = votes.map((vote) => {
-                console.log(vote)
-                console.log(vote.toJson())
-                return vr.addVote(vote)
-            })
-            return proms
+        .then(() => {
+            return Promise.all(VOTES.map((vote) => models.Vote.create(vote)))
         })
 }

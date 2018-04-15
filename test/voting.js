@@ -1,13 +1,13 @@
 var assert = require('assert');
 let models = require('../models')
-let dbSeed = require('../db_seed')
+let seeder = require('../db_seed')
 const _ = require('lodash')
 
 describe('voting', () => {
     //
     beforeEach(() => {
         return models.sequelize.sync({force: true})
-            .then(() => dbSeed({models}))
+            .then(() => seeder.seed({models}))
     })
 
     it('vote user & song', () => {
@@ -30,7 +30,7 @@ describe('voting', () => {
             })
             .then(([votes, winner]) => {
                 assert.equal(votes.length, 5)
-                assert.equal(winner.artistName, 'Bigiano')
+                assert.equal(winner.artistName, 'TuFace')
             })
     })
 

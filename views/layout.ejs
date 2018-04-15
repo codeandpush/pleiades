@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="images/playthis_logo.png"/>
+    <title>PlayThis</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.3.7/papaparse.js"></script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body data-emit-keyup="stage" style="position: relative">
+
+
+<div id="connection_alert"
+     style="background-color: orange;width: 100%;position: absolute;left: 0px;top: 0px;height: 32px">
+    <center style="color: white"><h5>Connection lost, please refresh the page</h5></center>
+</div>
+
+
+<main style="height: 100%">
+    <section>
+        <div class="container" id="appContainer">
+        </div>
+    </section>
+</main>
+
+
+<script src="dist/bkendz.js"></script>
+<script src="js/app.js"></script>
+<script>
+    app.main()
+</script>
+</body>
+</html>

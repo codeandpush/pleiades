@@ -17,8 +17,13 @@ class ClientSession extends SessionHandler {
         console.log(`[${this.constructor.name}#onMessage] topic=%s, source=%s`, topic, src)
         switch (topic) {
             case '/':
-                return {render: ['index']}
+                let indexPage = this.index()
+                return {render: [indexPage.template, indexPage.args || {}]}
         }
+    }
+    
+    index(){
+        return {template: 'index'}
     }
     
 }
