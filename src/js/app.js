@@ -16,13 +16,13 @@ class PleiadesApp extends Bkendz {
             playlistContainer: $('#appContainer')
         }
     }
-
-    get role(){}
-
-    set room(newRoom){
     
+    get role() {
     }
     
+    set room(newRoom) {
+    
+    }
     
     
 }
@@ -39,7 +39,7 @@ app.on('server_connected', () => {
     console.log('server connected')
     app.elems.connectionAlert.slideUp().hide()
     
-    if(!app.apiLocation){
+    if (!app.apiLocation) {
         app.server.json('/api', location).then((res) => {
             app.apiLocation = res.data
             app.connectToApi()
@@ -55,7 +55,7 @@ app.on('api_disconnected', () => {
 app.on('api_connected', () => {
     console.log('api connected')
     
-    if(!app.dbSchema){
+    if (!app.dbSchema) {
         app.api.json('/as').then((resp) => {
             app.dbSchema = resp.data
         })
@@ -67,24 +67,27 @@ app.on('api_connected', () => {
 })
 
 app.on('changed_dbschema', () => {
-    let getTemplate = app.getTemplate('_vote_status.ejs')
-    let fetchSong = app.fetch('Song', {where: {}}).then((res) => res.data)
-    
-    return Promise.all([fetchSong, getTemplate])
-        .then(([songs, template]) => {
-            let compiled = _.template(template)
-            _.each(songs, (song) => {
-                let el = $(compiled({song}))
-                app.elems.songsContainer.append(el)
+    return app.fetch('Song', {where: {}}).then((res) => res.data)
+        .then((songs) => {
+            let argsList = songs.map((s) => {
+                return {song: s}
+            })
+            return app.repeat({
+                template: '_vote_status.ejs',
+                templateArgs: argsList,
+                target: app.elems.songsContainer,
+                wrapFn: () => {
+                    return {prepend: `<li class="list-group-item">`, append: `</li>`}
+                }
             })
         })
 })
 
-app.on('click_song', (e)=>{
+app.on('click_song', (e) => {
     console.log('song clicked')
 })
 
-app.on('click_admin', (e)=>{
+app.on('click_admin', (e) => {
     let getTemplate = app.getTemplate('_upload_playlist.ejs')
     return Promise.all([getTemplate])
         .then(([template]) => {
@@ -97,20 +100,22 @@ app.on('click_admin', (e)=>{
         })
 })
 
-app.on('change_fileSelected', (evt)=>{
+app.on('change_fileSelected', (evt) => {
     let files = evt.target.files
     for (let i = 0, f; f = files[i]; i++) {
         let reader = new FileReader();
         reader.onload = function (e) {
             let csvString = reader.result;
             let songs = Papa.parse(csvString).data.map(elem => {
-                   return { artistName: elem[0],
+                return {
+                    artistName: elem[0],
                     name: elem[1],
-                    title: elem[1]}
-                })
+                    title: elem[1]
+                }
+            })
             let getTemplate = app.getTemplate('playlist.ejs')
             let playlistElem = $('#playlist')
-
+            
             return Promise.all([Promise.resolve(songs), getTemplate])
                 .then(([songs, template]) => {
                     let compiled = _.template(template)
