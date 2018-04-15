@@ -11,6 +11,7 @@ class Song extends DbObject {
     
     static columnDefs(DataTypes) {
         return {
+            title: DataTypes.STRING,
             name: DataTypes.STRING,
             artistName: DataTypes.STRING,
             lyrics: DataTypes.TEXT

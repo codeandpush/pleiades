@@ -8,24 +8,27 @@ const _ = require('lodash')
 class ApiSession extends ApiSessionHandler {
     
     static supportedTopics(){
-        return []
+        return ['/fetch',]
     }
     
     onMessage(topic, request){
-        let presentationid = request.presentationid
         switch (topic){
-            case '/slides':
-                return this.models.Presentation.findById(presentationid)
-                    .then(p => p.getSlides())
-                    .then((slides) => {
-                        return _.map(slides, (s) => s.toJson())
-                    })
+            case '/fetch':
+                let model = request.model
+                let where = request.where || {}
+                
+                if(!(model in this.models)) throw new Error(`Unkown model: ${model}`)
+                
+                return this.models[model].findAll({where: where})
+                    .then((rooms) => {
+                    return rooms.map((r) => r.toJson())
+                })
         }
     }
     
     onListening(){
         console.log(`[${this.constructor.name}] seeding database`)
-        return require('./db_seed')({models: this.models})
+        //return require('./db_seed')({models: this.models})
     }
 }
 

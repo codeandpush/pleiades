@@ -6,16 +6,23 @@ class PleiadesApp extends Bkendz {
     
     constructor() {
         super()
+        this._room = null
     }
     
     get elems() {
         return {
-            connectionAlert: $('#connection_alert')
+            connectionAlert: $('#connection_alert'),
+            songsContainer: $('#songs')
         }
     }
 
     get role(){}
 
+    set room(newRoom){
+    
+    }
+    
+    
     
 }
 
@@ -47,7 +54,27 @@ app.on('api_disconnected', () => {
 app.on('api_connected', () => {
     console.log('api connected')
     
+    if(!app.dbSchema){
+        app.api.json('/as').then((resp) => {
+            app.dbSchema = resp.data
+        })
+    }
+    
     app.api.on('db_update', (snapshot) => {
         console.log('[db_update]', snapshot)
     })
+})
+
+app.on('changed_dbschema', () => {
+    let getTemplate = app.getTemplate('_vote_status.ejs')
+    let fetchSong = app.fetch('Song', {where: {}}).then((res) => res.data)
+    
+    return Promise.all([fetchSong, getTemplate])
+        .then(([songs, template]) => {
+            let compiled = _.template(template)
+            _.each(songs, (song) => {
+                let el = $(compiled({song}))
+                app.elems.songsContainer.append(el)
+            })
+        })
 })

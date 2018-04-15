@@ -10,7 +10,7 @@ SessionHandler.DEFAULT_API_URL = '//localhost:64321'
 class ClientSession extends SessionHandler {
     
     static supportedTopics() {
-        return ['/', '/test']
+        return ['/']
     }
     
     onMessage(topic, request, src) {
@@ -18,23 +18,7 @@ class ClientSession extends SessionHandler {
         switch (topic) {
             case '/':
                 return {render: ['index']}
-
-            case '/room/admin/votingtally':
-                return {render: ['vote_status']}
-            case '/test':
-                console.log('[Socket Recieved]', _.omit(request, 'conn'))
-                return {data: 'Got it!'}
         }
-    }
-
-    setupBasicMiddleware(){
-        this.messageHandlers.http.get('/room/:id', function(req, res, next) {
-            console.log('PARAM:', req.params.id, ' FilePath:', path.resolve(__dirname, 'views/vote_status.ejs'))
-            let fileName = path.resolve(__dirname, 'views/vote_status.ejs')
-            return res.render('vote_status')
-        })
-
-        super.setupBasicMiddleware()
     }
     
 }
