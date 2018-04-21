@@ -54,9 +54,10 @@ api.messageHandlers.http.post('/api/create/playlist', function(req, res, next) {
 api.messageHandlers.http.post('/api/create/room', function(req, res, next) {
     reqData = req.body
     console.log(reqData)
-    const models = require('./models')
-    console.log(models)
-    return models.MusicRoom.create(reqData)
+    return api.models.MusicRoom.create(reqData)
+        .then((room) => {
+            res.json(room)
+        })
 })
 
 api.messageHandlers.http.post('/api/room/vote', function(req, res, next) {
