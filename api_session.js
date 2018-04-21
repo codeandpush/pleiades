@@ -109,22 +109,24 @@ api.messageHandlers.http.get('/api/room/:id', function (req, res, next) {
     return res.json([{song: "bank alert"},])
 })
 
-api.messageHandlers.http.post('/api/create/playlist', function (req, res, next) {
-    reqData = req.body
-    playlist = reqData.playlist
-    const models = require('./models')
+api.messageHandlers.http.post('/api/create/playlist', function(req, res, next) {
+    let reqData = req.body
+    let playlist = reqData.playlist
 
+    var songList = []
     for (let song of playlist) {
         console.log(song);
         let song = models.Song.create(song)
-        models.RoomSong.create({songId: song.id, roomId: reqData.roomId},)
+        api.models.RoomSong.create({songId: song.id, roomId: reqData.roomId})
+            .then((roomSong) => {
+                songList.concat(roomSong)
+            })
     }
-    return res.json(reqData)
+    return res.json(songList)
 })
 
-api.messageHandlers.http.post('/api/create/room', function (req, res, next) {
-    reqData = req.body
-    console.log(reqData)
+api.messageHandlers.http.post('/api/create/room', function(req, res, next) {
+    let reqData = req.body
     return api.models.MusicRoom.create(reqData)
         .then((room) => {
             res.json(room)
@@ -147,15 +149,15 @@ wsHandler.on('db_update', (updates) => {
 wsHandler.on('subscription_added', (subject) => {
     console.log(`[${api.constructor.name}#subscription_added] sending snapshot`)
     let models = api.models
-
-    // _.each(models, (cls, modelName) => {
-    //     cls.all().then((records) => {
-    //         let updates = records.map(u => {
-    //             return {changeType: 'NEW', type: modelName, value: u.toJson()}
-    //         })
-    //         wsHandler.emit('db_update', updates)
-    //     })
-    // })
+    
+    _.each(models, (cls, modelName) => {
+        cls.all().then((records) => {
+            let updates = records.map(u => {
+                return {changeType: 'NEW', type: modelName, value: u.toJson()}
+            })
+            wsHandler.emit('db_update', updates)
+        })
+    })
 })
 
 wsHandler.topic('/status', () => {
