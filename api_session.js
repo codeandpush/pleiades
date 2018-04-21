@@ -38,6 +38,20 @@ api.messageHandlers.http.get('/api/room/:id', function(req, res, next) {
     return res.json([{song:"bank alert"},])
 })
 
+api.messageHandlers.http.post('/api/room/:id', function(req, res, next) {
+    return res.json([{song:"bank alert"},])
+})
+
+api.messageHandlers.http.post('/api/room/create', function(req, res, next) {
+    console.log("create room")
+    return res.json([{song:"bank alert"},])
+})
+
+api.messageHandlers.http.post('/api/room/vote', function(req, res, next) {
+    console.log("voting on song.")
+    return res.json([{song:"bank alert"},])
+})
+
 const wsHandler = api.messageHandlers.ws
 
 wsHandler.on('db_update', (updates) => {

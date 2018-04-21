@@ -87,6 +87,10 @@ app.on('click_song', (e) => {
     console.log('song clicked')
 })
 
+app.on('click_createRoom', (evt) => {
+    console.log("Create room clicked");
+})
+
 app.on('click_admin', (e) => {
     let getTemplate = app.getTemplate('_upload_playlist.ejs')
     return Promise.all([getTemplate])
