@@ -38,6 +38,8 @@ api.messageHandlers.http.get('/api/room/:id', function(req, res, next) {
     return res.json([{song:"bank alert"},])
 })
 
+
+/*TODO Implement Post*/
 api.messageHandlers.http.post('/api/room/:id', function(req, res, next) {
     return res.json([{song:"bank alert"},])
 })
