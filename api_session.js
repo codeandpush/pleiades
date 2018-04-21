@@ -39,21 +39,23 @@ api.messageHandlers.http.get('/api/room/:id', function(req, res, next) {
 })
 
 api.messageHandlers.http.post('/api/create/playlist', function(req, res, next) {
-    reqData = req.body
-    playlist = reqData.playlist
-    const models = require('./models')
+    let reqData = req.body
+    let playlist = reqData.playlist
 
+    var songList = []
     for (let song of playlist) {
         console.log(song);
         let song = models.Song.create(song)
-        models.RoomSong.create({songId: song.id, roomId: reqData.roomId},)
+        api.models.RoomSong.create({songId: song.id, roomId: reqData.roomId})
+            .then((roomSong) => {
+                songList.concat(roomSong)
+            })
     }
-    return res.json(reqData)
+    return res.json(songList)
 })
 
 api.messageHandlers.http.post('/api/create/room', function(req, res, next) {
-    reqData = req.body
-    console.log(reqData)
+    let reqData = req.body
     return api.models.MusicRoom.create(reqData)
         .then((room) => {
             res.json(room)
