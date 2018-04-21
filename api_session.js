@@ -4,38 +4,109 @@
 const {ApiSessionHandler} = require('bkendz')
 const url = require('url')
 const _ = require('lodash')
+const Promise = require('bluebird')
+var bcrypt = require('bcrypt')
+var jwt = require('jwt-simple')
 
 class ApiSession extends ApiSessionHandler {
-    
-    static supportedTopics(){
-        return ['/fetch']
+
+    static supportedTopics() {
+        return ['/fetch', '/authenticate']
     }
-    
-    onMessage(topic, request){
-        switch (topic){
-            case '/fetch':
-                let model = request.model
-                let where = request.where || {}
-                
-                if(!(model in this.models)) throw new Error(`Unknown model: ${model}`)
-                
-                return this.models[model].findAll({where: where})
-                    .then((rooms) => {
-                    return rooms.map((r) => r.toJson())
-                })
-        }
+
+    static publicTopics() {
+        return this.supportedTopics()
     }
-    
-    onListening(){
+
+    onMessage(topic, request, src) {
+        let accessToken = request.ACCESS_TOKEN || null
+        return this.resolveSession(accessToken)
+            .catch((e) => {
+                if (_.includes(this.constructor.publicTopics(), topic)) {
+                    return Promise.resolve(this.models.Session.PUBLIC)
+                }else {
+                    throw e
+                }
+            })
+            .then((session) => {
+
+                switch (topic) {
+                    case '/fetch':
+                        let model = request.model
+                        let where = request.where || {}
+
+                        if (!(model in this.models)) throw new Error(`Unknown model: ${model}`)
+
+                        return this.models[model].findAll({where: where})
+                            .then((rooms) => {
+                                return rooms.map((r) => r.toJson())
+                            })
+
+                    case '/authenticate':
+                        return this.tokens(request)
+
+                    default:
+                        console.warn(`[${this.constructor.name}#onMessage] Unknown message (${src}): ${_.omit(request, 'conn')}`)
+                }
+            })
+    }
+
+    SECRET() {
+        return 'SECRET'
+    }
+
+    resolveSession(token) {
+        return Promise.resolve()
+            .then(() => {
+                console.log('[resolveSession] token:', token)
+                let auth = jwt.decode(token, this.SECRET())
+                return this.models.Session.findOne({where: {userId: auth.userId}})
+                    .then((sess) => {
+                        if(_.isObject(sess)) return sess
+                        else throw new Error('invalid access token: ' + token)
+                    })
+            })
+    }
+
+    tokens(req) {
+        let email = req.body.email
+        console.log(`[${this.constructor.name}#tokens] getting tokens:`, _.omit(req, 'conn'))
+        return api.models.User.findOne({where: {nickname: email}})
+            .then((user) => {
+                if(!_.isObject(user)) throw new Error('no user with email: ' + email)
+
+                let password = req.body.password
+                let hash = user.passwordHash
+                //console.log(`[${this.constructor.name}#tokesn] comparing: password=${req.body.password}, hash=${hash}`)
+                return Promise.promisify(bcrypt.compare)(password, hash)
+                    .then((isValid) => {
+                        if(!isValid) throw new Error('in valid password!')
+                        return this.models.Session.create({userId: user.id, email})
+                    })
+                    .then(() => {
+
+                        let access = jwt.encode({email, userId: user.id}, this.SECRET())
+                        console.log('[AccessToken]', access)
+                        return {
+                            tokens: {
+                                access: access,
+                                refresh: {}
+                            }
+                        }
+                    })
+            })
+    }
+
+    onListening() {
         console.log(`[${this.constructor.name}] seeding database`)
     }
-    
+
 }
 
 let api = new ApiSession()
 
-api.messageHandlers.http.get('/api/room/:id', function(req, res, next) {
-    return res.json([{song:"bank alert"},])
+api.messageHandlers.http.get('/api/room/:id', function (req, res, next) {
+    return res.json([{song: "bank alert"},])
 })
 
 api.messageHandlers.http.post('/api/create/playlist', function(req, res, next) {
@@ -62,9 +133,9 @@ api.messageHandlers.http.post('/api/create/room', function(req, res, next) {
         })
 })
 
-api.messageHandlers.http.post('/api/room/vote', function(req, res, next) {
+api.messageHandlers.http.post('/api/room/vote', function (req, res, next) {
     console.log("voting on song.")
-    return res.json([{song:"bank alert"},])
+    return res.json([{song: "bank alert"},])
 })
 
 const wsHandler = api.messageHandlers.ws
@@ -93,7 +164,7 @@ wsHandler.topic('/status', () => {
     return {data: {clients: wsHandler.connections.length}}
 })
 
-if(process.env.NODE_ENV !== 'production'){
+if (process.env.NODE_ENV !== 'production') {
     wsHandler.topic('/exec', (conn, msg) => {
         let cmd = msg.cmd
         console.log('[EXEC] command:', cmd, msg)
@@ -101,7 +172,7 @@ if(process.env.NODE_ENV !== 'production'){
         console.log('[EXEC]', buf)
         return {data: {out: buf}}
     })
-    
+
     wsHandler.topic('/eval', (conn, msg) => {
         let cmd = msg.exp
         console.log('[EVAL] command:', cmd, msg)

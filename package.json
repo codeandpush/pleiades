@@ -27,11 +27,13 @@
   },
   "homepage": "https://github.com/codeandpush/pleiades#readme",
   "dependencies": {
+    "bcrypt": "^2.0.1",
     "bkendz": "file:../bkendz",
     "bluebird": "^3.5.1",
     "del": "^3.0.0",
     "epa": "^0.2.1",
     "gulp": "^3.9.1",
+    "jwt-simple": "^0.5.1",
     "lodash": "^4.17.5",
     "mocha": "^5.0.5",
     "moment": "^2.21.0",
