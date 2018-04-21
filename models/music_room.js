@@ -12,8 +12,6 @@ class MusicRoom extends DbObject {
         }
     }
 
-
-
     addSong(song){
         const models = require('../models')
         return models.RoomSong.create({roomId: this.id, songId: song.id})

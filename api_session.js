@@ -38,15 +38,25 @@ api.messageHandlers.http.get('/api/room/:id', function(req, res, next) {
     return res.json([{song:"bank alert"},])
 })
 
+api.messageHandlers.http.post('/api/create/playlist', function(req, res, next) {
+    reqData = req.body
+    playlist = reqData.playlist
+    const models = require('./models')
 
-/*TODO Implement Post*/
-api.messageHandlers.http.post('/api/room/:id', function(req, res, next) {
-    return res.json([{song:"bank alert"},])
+    for (let song of playlist) {
+        console.log(song);
+        let song = models.Song.create(song)
+        models.RoomSong.create({songId: song.id, roomId: reqData.roomId},)
+    }
+    return res.json(reqData)
 })
 
-api.messageHandlers.http.post('/api/room/create', function(req, res, next) {
-    console.log("create room")
-    return res.json([{song:"bank alert"},])
+api.messageHandlers.http.post('/api/create/room', function(req, res, next) {
+    reqData = req.body
+    console.log(reqData)
+    const models = require('./models')
+    console.log(models)
+    return models.MusicRoom.create(reqData)
 })
 
 api.messageHandlers.http.post('/api/room/vote', function(req, res, next) {
