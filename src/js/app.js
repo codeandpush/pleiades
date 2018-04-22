@@ -24,7 +24,6 @@ class PleiadesApp extends Bkendz {
     
     }
     
-    
 }
 
 window.app = new PleiadesApp()
@@ -60,15 +59,28 @@ app.on('api_connected', () => {
             app.dbSchema = resp.data
         })
     }
-    
+
+    app.resolveAccess('chinwo', 'password')
+})
+
+app.on('click_signin', (e) => {
+    console.log('[App] sign in', e)
+})
+
+app.on('changed_accesstoken', (newToken, oldToken) => {
+    console.log('[changed_accesstoken] new=%s, old=%s', newToken, oldToken)
     app.api.on('db_update', (snapshot) => {
         console.log('[db_update]', snapshot)
     })
 })
 
 app.on('changed_dbschema', () => {
-    return app.fetch('Song', {where: {}}).then((res) => res.data)
+    return app.fetch('Song', {where: {}})
+        .catch((err) => console.error('[changed_dbschema]', err))
+        .then((res) => (res || {}).data)
         .then((songs) => {
+            if(!_.isArray(songs)) return
+
             let argsList = songs.map((s) => {
                 return {song: s}
             })

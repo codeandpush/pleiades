@@ -15,7 +15,7 @@ class ApiSession extends ApiSessionHandler {
     }
 
     static publicTopics() {
-        return this.supportedTopics()
+        return ['/authenticate']
     }
 
     onMessage(topic, request, src) {
@@ -69,13 +69,13 @@ class ApiSession extends ApiSessionHandler {
     }
 
     tokens(req) {
-        let email = req.body.email
-        console.log(`[${this.constructor.name}#tokens] getting tokens:`, _.omit(req, 'conn'))
+        let email = req.email || req.body.email
+        //console.log(`[${this.constructor.name}#tokens] getting tokens:`, _.omit(req, 'conn'))
         return api.models.User.findOne({where: {nickname: email}})
             .then((user) => {
                 if(!_.isObject(user)) throw new Error('no user with email: ' + email)
 
-                let password = req.body.password
+                let password = req.password || req.body.password
                 let hash = user.passwordHash
                 //console.log(`[${this.constructor.name}#tokesn] comparing: password=${req.body.password}, hash=${hash}`)
                 return Promise.promisify(bcrypt.compare)(password, hash)
