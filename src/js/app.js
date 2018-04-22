@@ -38,7 +38,7 @@ class PleiadesApp extends Bkendz {
     
     activeTab(tab, opts) {
         if (_.isUndefined(tab)) {
-        
+            return (document.querySelector('.tab-content .tab-pane.active') || {}).id
         } else {
             this._activeTab = tab
             let target = document.getElementById(tab)
@@ -52,14 +52,14 @@ class PleiadesApp extends Bkendz {
             //$().removeClass('active show').filter((i, e) => $(e).attr('id') == 'home').get(0).classList.add('active', 'show')
             return Promise.resolve()
                 .then(() => {
-                    if(target) return
-    
+                    if(target) target.remove()
+                    
                     let templateName = `_tab_${tab}.ejs`
-                    return this.getTemplate(templateName, opts)
+                    //this._templates = {} // clear templates cache
+                    return this.getTemplate(templateName, _.merge({rendered: {user: this.user}, reload: true}, opts))
                         .then((html) => {
                             let container = $('.tab-content').first()
-                            let content = _.template(html)(opts || {})
-                            let tabHtml = `<div class="tab-pane fade" id="${tab}" role="tabpanel">${content}</div>`
+                            let tabHtml = `<div class="tab-pane fade" id="${tab}" role="tabpanel">${html}</div>`
                             container.append($(tabHtml))
                         })
                 })
@@ -133,7 +133,7 @@ app.on('click_signin', (e) => {
 
 
 app.on('click_tab_signin', (e) => app.activeTab('signin'))
-app.on('click_tab_home_anon', (e) => app.activeTab('home_anon'))
+app.on('click_tab_home', (e) => app.activeTab('home'))
 
 app.on('changed_authuser', (newUser, oldUser) => {
     console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)

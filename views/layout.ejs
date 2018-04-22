@@ -33,7 +33,7 @@
 
 <main style="height: 100%">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" data-emit-click="tab_home_anon">PlayThis</a>
+        <a class="navbar-brand" data-emit-click="tab_home">PlayThis</a>
         <ul class="navbar-nav ml-auto">
             <button type="button" class="btn btn-link" data-emit-click="tab_signin">
                 Sign In
@@ -41,8 +41,8 @@
         </ul>
     </nav>
      <div class="tab-content" id="myTabContent">
-         <div class="tab-pane fade show active" id="home_anon" role="tabpanel" aria-labelledby="home-tab">
-             <%- include('_tab_home_anon') %>
+         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+             <%- include('_tab_home', {user: {nickname: 'TestUser'}}) %>
          </div>
      </div>
 
