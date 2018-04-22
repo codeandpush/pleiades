@@ -11,7 +11,7 @@ var jwt = require('jwt-simple')
 class ApiSession extends ApiSessionHandler {
 
     static supportedTopics() {
-        return ['/fetch', '/authenticate']
+        return ['/fetch', '/authenticate', '/user']
     }
 
     static publicTopics() {
@@ -31,6 +31,8 @@ class ApiSession extends ApiSessionHandler {
             .then((session) => {
 
                 switch (topic) {
+                    case '/user':
+                        return this.models.User.findOne({where: {id: session.userId}})
                     case '/fetch':
                         let model = request.model
                         let where = request.where || {}

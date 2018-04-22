@@ -7,6 +7,7 @@ class PleiadesApp extends Bkendz {
     constructor() {
         super()
         this._room = null
+        this._user = null
     }
     
     get elems() {
@@ -22,6 +23,28 @@ class PleiadesApp extends Bkendz {
     
     set room(newRoom) {
     
+    }
+
+    get user(){
+        return this._user
+    }
+
+    set user(newUser){
+        let oldUser = this._user
+        this._user = newUser
+        this.emit('changed_authuser', newUser, oldUser)
+    }
+
+    fetchAuthUser(){
+        return this.api.json('/user')
+            .then((res) => {
+                this.user = res.data
+            })
+    }
+
+    init(){
+        super.init()
+        $('[data-toggle="popover"]').popover()
     }
     
 }
@@ -61,16 +84,21 @@ app.on('api_connected', () => {
     }
 
     app.resolveAccess('chinwo', 'password')
+        .then(() => app.fetchAuthUser())
 })
 
 app.on('click_signin', (e) => {
     console.log('[App] sign in', e)
 })
 
+app.on('changed_authuser', (newUser, oldUser) => {
+    console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)
+})
+
 app.on('changed_accesstoken', (newToken, oldToken) => {
     console.log('[changed_accesstoken] new=%s, old=%s', newToken, oldToken)
     app.api.on('db_update', (snapshot) => {
-        console.log('[db_update]', snapshot)
+        //console.log('[db_update]', snapshot)
     })
 })
 
