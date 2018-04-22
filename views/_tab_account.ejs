@@ -1,12 +1,16 @@
 <div class="container">
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title text-lowercase"><%= user.nickname %></h5>
-            <h6 class="card-subtitle mb-2 text-muted">Account Settings</h6>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's
-                content.</p>
-            <a href="#" class="card-link text-success">Save</a>
-            <a href="#" class="card-link text-danger">Cancel</a>
+    <div class="columns is-mobile">
+
+        <button type="button" class="btn btn-success">Create room</button>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Upload</span>
+            </div>
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="inputGroupFile01">
+                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+            </div>
         </div>
     </div>
 </div>
