@@ -125,18 +125,28 @@ app.on('click_signin', (e) => {
     console.log('[signin] nickname=%s, password=%s', nickname, passwrd)
     app.resolveAccess(nickname, passwrd)
         .then(() => app.fetchAuthUser())
-        .then(() => {
-            app.activeTab('home', {nickname: app.user.nickname})
-            $('[data-emit-click="tab_signin"]').text(app.user.nickname)
-        })
 })
 
 
-app.on('click_tab_signin', (e) => app.activeTab('signin'))
+app.on('click_tab_signin', (e) => {
+    let txt = $(e.target).text().trim()
+    console.log('[click_tab_signin] text:', txt)
+    
+    switch(txt){
+        case 'Sign In':
+            return app.activeTab('signin')
+        default:
+            return app.activeTab('account')
+    }
+    
+})
+
 app.on('click_tab_home', (e) => app.activeTab('home'))
 
 app.on('changed_authuser', (newUser, oldUser) => {
     console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)
+    app.activeTab('home', {nickname: newUser && newUser.nickname || null})
+    $('[data-emit-click="tab_signin"]').text(_.isObject(newUser) ? app.user.nickname : 'Sign In')
 })
 
 app.on('changed_accesstoken', (newToken, oldToken) => {
