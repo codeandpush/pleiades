@@ -8,6 +8,7 @@ class PleiadesApp extends Bkendz {
         super()
         this._room = null
         this._user = null
+        this._activeTab = null
     }
     
     get elems() {
@@ -24,25 +25,56 @@ class PleiadesApp extends Bkendz {
     set room(newRoom) {
     
     }
-
-    get user(){
+    
+    get user() {
         return this._user
     }
-
-    set user(newUser){
+    
+    set user(newUser) {
         let oldUser = this._user
         this._user = newUser
         this.emit('changed_authuser', newUser, oldUser)
     }
-
-    fetchAuthUser(){
+    
+    activeTab(tab, opts) {
+        if (_.isUndefined(tab)) {
+        
+        } else {
+            this._activeTab = tab
+            let target = document.getElementById(tab)
+            
+            let apply = () => {
+                for (let elem of document.querySelectorAll('.tab-content .tab-pane')) {
+                    if (elem.id === tab) elem.classList.add('active', 'show')
+                    else elem.classList.remove('active', 'show')
+                }
+            }
+            //$().removeClass('active show').filter((i, e) => $(e).attr('id') == 'home').get(0).classList.add('active', 'show')
+            return Promise.resolve()
+                .then(() => {
+                    if(target) return
+    
+                    let templateName = `_tab_${tab}.ejs`
+                    return this.getTemplate(templateName, opts)
+                        .then((html) => {
+                            let container = $('.tab-content').first()
+                            let content = _.template(html)(opts || {})
+                            let tabHtml = `<div class="tab-pane fade" id="${tab}" role="tabpanel">${content}</div>`
+                            container.append($(tabHtml))
+                        })
+                })
+                .then(apply)
+        }
+    }
+    
+    fetchAuthUser() {
         return this.api.json('/user')
             .then((res) => {
                 this.user = res.data
             })
     }
-
-    init(){
+    
+    init() {
         super.init()
         $('[data-toggle="popover"]').popover()
     }
@@ -82,14 +114,26 @@ app.on('api_connected', () => {
             app.dbSchema = resp.data
         })
     }
-
-    app.resolveAccess('chinwo', 'password')
-        .then(() => app.fetchAuthUser())
+    
+    
 })
 
 app.on('click_signin', (e) => {
-    console.log('[App] sign in', e)
+    let inputs = document.forms[0].getElementsByTagName('input')
+    let nickname = inputs['email'].value
+    let passwrd = inputs['password'].value
+    console.log('[signin] nickname=%s, password=%s', nickname, passwrd)
+    app.resolveAccess(nickname, passwrd)
+        .then(() => app.fetchAuthUser())
+        .then(() => {
+            app.activeTab('home', {nickname: app.user.nickname})
+            $('[data-emit-click="tab_signin"]').text(app.user.nickname)
+        })
 })
+
+
+app.on('click_tab_signin', (e) => app.activeTab('signin'))
+app.on('click_tab_home_anon', (e) => app.activeTab('home_anon'))
 
 app.on('changed_authuser', (newUser, oldUser) => {
     console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)
@@ -103,24 +147,24 @@ app.on('changed_accesstoken', (newToken, oldToken) => {
 })
 
 app.on('changed_dbschema', () => {
-    return app.fetch('Song', {where: {}})
-        .catch((err) => console.error('[changed_dbschema]', err))
-        .then((res) => (res || {}).data)
-        .then((songs) => {
-            if(!_.isArray(songs)) return
-
-            let argsList = songs.map((s) => {
-                return {song: s}
-            })
-            return app.repeat({
-                template: '_vote_status.ejs',
-                templateArgs: argsList,
-                target: app.elems.songsContainer,
-                wrapFn: () => {
-                    return {prepend: `<li class="list-group-item">`, append: `</li>`}
-                }
-            })
-        })
+    // return app.fetch('Song', {where: {}})
+    //     .catch((err) => console.error('[changed_dbschema]', err))
+    //     .then((res) => (res || {}).data)
+    //     .then((songs) => {
+    //         if (!_.isArray(songs)) return
+    //
+    //         let argsList = songs.map((s) => {
+    //             return {song: s}
+    //         })
+    //         return app.repeat({
+    //             template: '_vote_status.ejs',
+    //             templateArgs: argsList,
+    //             target: app.elems.songsContainer,
+    //             wrapFn: () => {
+    //                 return {prepend: `<li class="list-group-item">`, append: `</li>`}
+    //             }
+    //         })
+    //     })
 })
 
 app.on('click_song', (e) => {
@@ -173,4 +217,4 @@ app.on('change_fileSelected', (evt) => {
     }
 })
 
-app.debugMode = true
+app.debugMode = false

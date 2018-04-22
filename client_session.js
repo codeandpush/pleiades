@@ -23,7 +23,7 @@ class ClientSession extends SessionHandler {
     }
     
     index(){
-        return {template: 'index'}
+        return {template: 'layout'}
     }
     
 }

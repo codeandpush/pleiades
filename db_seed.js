@@ -4,7 +4,7 @@
 const _ = require('lodash')
 
 const USERS = [
-    {nickname: 'hvcc'},
+    {nickname: 'hvcc', passwordHash: '$2b$10$Td.oPqfrnfKN.nJJBbA7zOnMnRmSsTdptMu/fLuW.6JOFRmMhDJv.'},
     {nickname: 'chinwo', passwordHash: '$2b$10$Td.oPqfrnfKN.nJJBbA7zOnMnRmSsTdptMu/fLuW.6JOFRmMhDJv.'},
     {nickname: 'obi'},
     {nickname: 'hawa'},
