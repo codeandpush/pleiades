@@ -14,8 +14,8 @@ class PleiadesApp extends Bkendz {
     get elems() {
         return {
             connectionAlert: $('#connection_alert'),
-            songsContainer: $('#appContainer'),
-            playlistContainer: $('#appContainer')
+            searchInput: $(document.querySelector('#search_term')),
+            searchResultsContainer: $('#search_results_container')
         }
     }
     
@@ -38,13 +38,13 @@ class PleiadesApp extends Bkendz {
     
     activeTab(tab, opts) {
         if (_.isUndefined(tab)) {
-            return (document.querySelector('.tab-content .tab-pane.active') || {}).id
+            return (document.querySelector('#tab-panes .tab-pane.active') || {}).id
         } else {
             this._activeTab = tab
             let target = document.getElementById(tab)
             
             let apply = () => {
-                for (let elem of document.querySelectorAll('.tab-content .tab-pane')) {
+                for (let elem of document.querySelectorAll('#tab-panes .tab-pane')) {
                     if (elem.id === tab) elem.classList.add('active', 'show')
                     else elem.classList.remove('active', 'show')
                 }
@@ -58,7 +58,7 @@ class PleiadesApp extends Bkendz {
                     //this._templates = {} // clear templates cache
                     return this.getTemplate(templateName, _.merge({rendered: {user: this.user}, reload: true}, opts))
                         .then((html) => {
-                            let container = $('.tab-content').first()
+                            let container = $('#tab-panes').first()
                             let tabHtml = `<div class="tab-pane fade" id="${tab}" role="tabpanel">${html}</div>`
                             container.append($(tabHtml))
                         })
@@ -79,9 +79,35 @@ class PleiadesApp extends Bkendz {
         $('[data-toggle="popover"]').popover()
     }
     
+    static newSearchResult(kwargs){
+        let searchResElem = this._SEARCH_RESULT_POOL.shift()
+        let defaultOpts = {thumbnail_url: 'http://www.aber.ac.uk/staff-profile-assets/img/noimg.png', title: '', description: ''}
+        
+        kwargs = _.merge(defaultOpts, kwargs)
+        
+        if(searchResElem){
+            searchResElem = $(searchResElem)
+            searchResElem.find('p').text(kwargs.description || kwargs.email)
+            searchResElem.find('.media-heading a').text(kwargs.title || kwargs.name)
+            searchResElem.find('img').attr('src', kwargs.thumbnail_url)
+        }else{
+            searchResElem = $(_.template(this.TEMPLATE_SEARCH_RESULT)(kwargs))
+        }
+        
+        searchResElem.prop('hidden', false)
+        return searchResElem
+    }
+    
+    static deleteSearchResult(searchResult){
+        $(searchResult).prop('hidden', true)
+        this._SEARCH_RESULT_POOL.push(searchResult)
+    }
+    
 }
 
 window.app = new PleiadesApp()
+
+PleiadesApp._SEARCH_RESULT_POOL = []
 
 app.on('server_disconnected', () => {
     console.log('server disconnected')
@@ -116,6 +142,36 @@ app.on('api_connected', () => {
     }
     
     
+})
+
+app.on('submitted_search_room', (term) => {
+    app.api.json(`/search?q=${term}`)
+        .then((resp) => {
+            
+            $('.search-result-item').each((idx, elem) => {
+                PleiadesApp.deleteSearchResult(elem)
+            })
+            
+            for(let searchResultKwargs of resp.data.results){
+                let elem = PleiadesApp.newSearchResult(searchResultKwargs)
+                
+                switch(searchResultKwargs.$type){
+                    case 'MusicRoom':
+                        app.elems.searchResultsContainer.append(elem)
+                        break
+                }
+                
+            }
+        })
+})
+
+app.on('click_search_room', () => {
+    app.emit('submitted_search_room', app.elems.searchInput.val())
+})
+
+app.on('keyup_search_room', (ev) => {
+    //if (ev.which === 13)
+    app.emit('submitted_search_room', app.elems.searchInput.val())
 })
 
 app.on('click_signin', (e) => {
@@ -157,24 +213,7 @@ app.on('changed_accesstoken', (newToken, oldToken) => {
 })
 
 app.on('changed_dbschema', () => {
-    // return app.fetch('Song', {where: {}})
-    //     .catch((err) => console.error('[changed_dbschema]', err))
-    //     .then((res) => (res || {}).data)
-    //     .then((songs) => {
-    //         if (!_.isArray(songs)) return
-    //
-    //         let argsList = songs.map((s) => {
-    //             return {song: s}
-    //         })
-    //         return app.repeat({
-    //             template: '_vote_status.ejs',
-    //             templateArgs: argsList,
-    //             target: app.elems.songsContainer,
-    //             wrapFn: () => {
-    //                 return {prepend: `<li class="list-group-item">`, append: `</li>`}
-    //             }
-    //         })
-    //     })
+    console.log('[changed_dbschema]')
 })
 
 app.on('click_song', (e) => {
@@ -227,4 +266,31 @@ app.on('change_fileSelected', (evt) => {
     }
 })
 
+app.on('click_search', () => {
+    app.emit('submitted_search', app.elems.searchInput.val())
+})
+
+app.on('keyup_search', (ev) => {
+    //if (ev.which === 13)
+    app.emit('submitted_search', app.elems.searchInput.val())
+})
+
+app.on('click_show_all_search_result', () => {
+    app.elems.searchResultsContainer.find('.tab-pane').addClass('in active')
+})
+
 app.debugMode = false
+
+PleiadesApp.TEMPLATE_SEARCH_RESULT = `
+    <li class="media search-result-item" data-thumbnail="<%= thumbnail_url %>">
+        <div class="media-left media-middle">
+            <a href="#" data-category="app">
+                <img width="64px" height="64px" style="border-radius: 4px;background-color: aliceblue" class="media-object" src="<%= thumbnail_url %>" alt="product image">
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading"><a href="#"><%= title || name %></a></h4>
+            <p><%= updatedAt %></p>
+        </div>
+    </li>
+`

@@ -1,7 +1,13 @@
 
 <div class="input-group">
-    <input type="text" class="form-control" placeholder="Find Rooms" aria-describedby="basic-addon2">
+    <input type="text" class="form-control" placeholder="Find Rooms" id="search_term" data-emit-keyup="search_room" aria-describedby="basic-addon2">
     <div class="input-group-append">
-        <button class="btn btn-outline-secondary" type="button">Go!</button>
+        <button class="btn btn-outline-secondary" data-emit-click="search_room" type="button">Go!</button>
     </div>
+</div>
+
+<div class="container">
+    <ul id="search_results_container" class="media-list">
+
+    </ul>
 </div>

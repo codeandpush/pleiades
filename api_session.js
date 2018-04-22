@@ -11,11 +11,11 @@ var jwt = require('jwt-simple')
 class ApiSession extends ApiSessionHandler {
 
     static supportedTopics() {
-        return ['/fetch', '/authenticate', '/user']
+        return ['/fetch', '/authenticate', '/user', '/search']
     }
 
     static publicTopics() {
-        return ['/authenticate']
+        return ['/authenticate', '/search']
     }
 
     onMessage(topic, request, src) {
@@ -46,10 +46,41 @@ class ApiSession extends ApiSessionHandler {
 
                     case '/authenticate':
                         return this.tokens(request)
-
+                    case '/search':
+                        return this.onSearch(request)
                     default:
                         console.warn(`[${this.constructor.name}#onMessage] Unknown message (${src}): ${_.omit(request, 'conn')}`)
                 }
+            })
+    }
+    
+    onSearch(req){
+        //console.log('[onSearch]', _.omit(req, 'conn'))
+        const models = this.models
+        let query = req.q
+        let queryLower = query.toLowerCase()
+    
+        const filter = (modelJson) => {
+            for(let val of Object.values(modelJson)){
+                if(_.isString(val) && val.toLowerCase().indexOf(queryLower) !== -1){
+                    return true
+                }
+            }
+            return false
+        }
+    
+        const toJsonList = (modelName, models) => {
+            return models.map((m) => {
+                let j = m.get({plain:true})
+                j.$type = modelName
+                return j
+            })
+        }
+    
+        return models.MusicRoom.all()
+            .then((items) => {
+                let filteredItems = _.filter(toJsonList(models.MusicRoom.name, items), filter)
+                return {results: _.concat(filteredItems)}
             })
     }
 
