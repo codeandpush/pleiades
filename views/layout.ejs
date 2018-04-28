@@ -8,7 +8,6 @@
     <link rel="icon" type="image/png" href="images/playthis_logo.png"/>
     <title>PlayThis</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
@@ -33,10 +32,21 @@
 
 <main style="height: 100%">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" data-emit-click="tab_home">PlayThis</a>
-        <ul class="navbar-nav ml-auto">
-            <button type="button" class="btn btn-link" data-emit-click="tab_signin">Sign In</button>
-        </ul>
+        <a class="navbar-brand" role="button" data-emit-activetab="home">PlayThis</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="create_room_btn" data-emit-activetab="create_room" style="display: none">Create Room</button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn btn-link btn-sm" data-emit-click="tab_signin">Sign In</button>
+                </li>
+            </ul>
+        </div>
     </nav>
      <div class="tab-content" id="tab-panes">
          <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">

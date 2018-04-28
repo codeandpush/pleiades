@@ -9,14 +9,19 @@ class PleiadesApp extends Bkendz {
         this._room = null
         this._user = null
         this._activeTab = null
+        this._elems = null
     }
     
     get elems() {
-        return {
-            connectionAlert: $('#connection_alert'),
-            searchInput: $(document.querySelector('#search_term')),
-            searchResultsContainer: $('#search_results_container')
+        if(!this._elems) {
+            this._elems = new LazyObject({
+                connectionAlert: () => $('#connection_alert'),
+                searchInput: () => $(document.querySelector('#search_term')),
+                searchResultsContainer: () => $('#search_results_container'),
+                btnCreateRoom: () => $('#create_room_btn')
+            })
         }
+        return this._elems
     }
     
     get role() {
@@ -77,6 +82,7 @@ class PleiadesApp extends Bkendz {
     init() {
         super.init()
         $('[data-toggle="popover"]').popover()
+        $(document).on('click', '[data-emit-activetab]', (event) => this.activeTab(event.target.getAttribute('data-emit-activetab')))
     }
     
     static newSearchResult(kwargs){
@@ -103,6 +109,13 @@ class PleiadesApp extends Bkendz {
         this._SEARCH_RESULT_POOL.push(searchResult)
     }
     
+    tokensStored(){
+        let tokensString = localStorage.getItem('tokens')
+        if(!tokensString) return {}
+    
+        let tokens = _.attempt((tokenStr) => JSON.parse(tokenStr), tokensString)
+        return (_.isError(tokens)) ? {} : tokens
+    }
 }
 
 window.app = new PleiadesApp()
@@ -141,7 +154,11 @@ app.on('api_connected', () => {
         })
     }
     
-    
+    let tokens = app.tokensStored()
+    if(!app.accessToken && 'access' in tokens){
+        app.accessToken = tokens.access
+        app.fetchAuthUser()
+    }
 })
 
 app.on('submitted_search_room', (term) => {
@@ -178,9 +195,15 @@ app.on('click_signin', (e) => {
     let inputs = document.forms[0].getElementsByTagName('input')
     let nickname = inputs['email'].value
     let passwrd = inputs['password'].value
-    console.log('[signin] nickname=%s, password=%s', nickname, passwrd)
+    let remember = inputs['remember'].checked
+    console.log('[signin] nickname=%s, password=%s, remember=%s', nickname, passwrd, remember)
     app.resolveAccess(nickname, passwrd)
-        .then(() => app.fetchAuthUser())
+        .then((tokens) => {
+            console.log('[resolveAccess]', tokens)
+            app.fetchAuthUser()
+            if(remember) localStorage.setItem('tokens', JSON.stringify(tokens))
+            else localStorage.setItem('tokens', '{}')
+        })
 })
 
 
@@ -197,12 +220,12 @@ app.on('click_tab_signin', (e) => {
     
 })
 
-app.on('click_tab_home', (e) => app.activeTab('home'))
-
 app.on('changed_authuser', (newUser, oldUser) => {
     console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)
     app.activeTab('home', {nickname: newUser && newUser.nickname || null})
     $('[data-emit-click="tab_signin"]').text(_.isObject(newUser) ? app.user.nickname : 'Sign In')
+    
+    app.elems.btnCreateRoom.show()
 })
 
 app.on('changed_accesstoken', (newToken, oldToken) => {
