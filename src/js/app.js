@@ -38,6 +38,8 @@ class PleiadesApp extends Bkendz {
     set user(newUser) {
         let oldUser = this._user
         this._user = newUser
+        if(!newUser) localStorage.removeItem('tokens')
+        
         this.emit('changed_authuser', newUser, oldUser)
     }
     
@@ -83,6 +85,10 @@ class PleiadesApp extends Bkendz {
         super.init()
         $('[data-toggle="popover"]').popover()
         $(document).on('click', '[data-emit-activetab]', (event) => this.activeTab(event.target.getAttribute('data-emit-activetab')))
+    }
+    
+    create(modelName, params){
+        return this.api.json(`/create_model?model=${modelName}`, {modelArgs: params})
     }
     
     static newSearchResult(kwargs){
@@ -158,6 +164,11 @@ app.on('api_connected', () => {
     if(!app.accessToken && 'access' in tokens){
         app.accessToken = tokens.access
         app.fetchAuthUser()
+            .catch((error) => {
+                console.error('auto signin error: %s', error)
+                app.accessToken = null
+                localStorage.removeItem('tokens')
+            })
     }
 })
 
@@ -192,20 +203,30 @@ app.on('keyup_search_room', (ev) => {
 })
 
 app.on('click_signin', (e) => {
-    let inputs = document.forms[0].getElementsByTagName('input')
+    let inputs = document.forms['form_signin'].getElementsByTagName('input')
     let nickname = inputs['email'].value
     let passwrd = inputs['password'].value
     let remember = inputs['remember'].checked
-    console.log('[signin] nickname=%s, password=%s, remember=%s', nickname, passwrd, remember)
+    
     app.resolveAccess(nickname, passwrd)
         .then((tokens) => {
-            console.log('[resolveAccess]', tokens)
             app.fetchAuthUser()
             if(remember) localStorage.setItem('tokens', JSON.stringify(tokens))
             else localStorage.setItem('tokens', '{}')
         })
 })
 
+app.on('click_create_music_room', (e) => {
+    console.log('[click_create_music_room]')
+    let inputs = document.forms['form_create_music_room'].getElementsByTagName('input')
+    let roomName = inputs['music_room_name'].value
+    let isPublic = inputs['music_room_ispublic'].checked
+    
+    app.create('MusicRoom', {name: roomName, isPublic})
+        .then((resp) => {
+            console.log('[MusicRoom#create]', resp)
+        })
+})
 
 app.on('click_tab_signin', (e) => {
     let txt = $(e.target).text().trim()
@@ -224,6 +245,9 @@ app.on('changed_authuser', (newUser, oldUser) => {
     console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)
     app.activeTab('home', {nickname: newUser && newUser.nickname || null})
     $('[data-emit-click="tab_signin"]').text(_.isObject(newUser) ? app.user.nickname : 'Sign In')
+    
+    if(!newUser) $('#create_room_btn').hide()
+    else $('#create_room_btn').show()
     
     app.elems.btnCreateRoom.show()
 })

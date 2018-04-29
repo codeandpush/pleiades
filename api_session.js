@@ -11,7 +11,7 @@ var jwt = require('jwt-simple')
 class ApiSession extends ApiSessionHandler {
 
     static supportedTopics() {
-        return ['/fetch', '/authenticate', '/user', '/search']
+        return ['/fetch', '/authenticate', '/user', '/search', '/create_model']
     }
 
     static publicTopics() {
@@ -43,7 +43,8 @@ class ApiSession extends ApiSessionHandler {
                             .then((rooms) => {
                                 return rooms.map((r) => r.toJson())
                             })
-
+                    case '/create_model':
+                        return this.models[request.model].create(request.modelArgs).then(m => m.toJson())
                     case '/authenticate':
                         return this.tokens(request)
                     case '/search':
@@ -71,7 +72,7 @@ class ApiSession extends ApiSessionHandler {
     
         const toJsonList = (modelName, models) => {
             return models.map((m) => {
-                let j = m.get({plain:true})
+                let j = m.toJson()
                 j.$type = modelName
                 return j
             })
