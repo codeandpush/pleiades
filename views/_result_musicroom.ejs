@@ -1,0 +1,8 @@
+<a href="#" class="list-group-item list-group-item-action flex-column align-items-start search-result-item" data-emit-click="view_room" data-roomid="<%= room.id %>">
+    <div class="d-flex w-100 justify-content-between" style="pointer-events: none">
+        <h5 class="mb-1" data-roomname="<%= room.name %>" style="pointer-events: none"><%= room.name %></h5>
+        <small data-roomupdatedat="<%= room.updatedAt %>" style="pointer-events: none"><%= room.updatedAt %></small>
+    </div>
+    <p class="mb-1" style="pointer-events: none" data-roomdescription="<%= room.description || '...' %>"><%= room.description || '...' %></p>
+    <small>Donec id elit non mi porta.</small>
+</a>

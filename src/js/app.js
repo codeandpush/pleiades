@@ -10,10 +10,11 @@ class PleiadesApp extends Bkendz {
         this._user = null
         this._activeTab = null
         this._elems = null
+        this._SEARCH_RESULT_POOL = []
     }
     
     get elems() {
-        if(!this._elems) {
+        if (!this._elems) {
             this._elems = new LazyObject({
                 connectionAlert: () => $('#connection_alert'),
                 searchInput: () => $(document.querySelector('#search_term')),
@@ -38,7 +39,7 @@ class PleiadesApp extends Bkendz {
     set user(newUser) {
         let oldUser = this._user
         this._user = newUser
-        if(!newUser) localStorage.removeItem('tokens')
+        if (!newUser) localStorage.removeItem('tokens')
         
         this.emit('changed_authuser', newUser, oldUser)
     }
@@ -49,6 +50,8 @@ class PleiadesApp extends Bkendz {
         } else {
             this._activeTab = tab
             let target = document.getElementById(tab)
+            opts = opts || {}
+            let reload = _.isUndefined(opts.reload) ? false : opts.reload
             
             let apply = () => {
                 for (let elem of document.querySelectorAll('#tab-panes .tab-pane')) {
@@ -59,11 +62,12 @@ class PleiadesApp extends Bkendz {
             //$().removeClass('active show').filter((i, e) => $(e).attr('id') == 'home').get(0).classList.add('active', 'show')
             return Promise.resolve()
                 .then(() => {
-                    if(target) target.remove()
+                    if (reload && target) target.remove()
+                    if (!reload && target) return
                     
                     let templateName = `_tab_${tab}.ejs`
                     //this._templates = {} // clear templates cache
-                    return this.getTemplate(templateName, _.merge({rendered: {user: this.user}, reload: true}, opts))
+                    return this.getTemplate(templateName, _.merge({rendered: {user: this.user}}, opts, {reload}))
                         .then((html) => {
                             let container = $('#tab-panes').first()
                             let tabHtml = `<div class="tab-pane fade" id="${tab}" role="tabpanel">${html}</div>`
@@ -87,46 +91,57 @@ class PleiadesApp extends Bkendz {
         $(document).on('click', '[data-emit-activetab]', (event) => this.activeTab(event.target.getAttribute('data-emit-activetab')))
     }
     
-    create(modelName, params){
+    create(modelName, params) {
         return this.api.json(`/create_model?model=${modelName}`, {modelArgs: params})
     }
     
-    static newSearchResult(kwargs){
+    newSearchResult(kwargs) {
         let searchResElem = this._SEARCH_RESULT_POOL.shift()
-        let defaultOpts = {thumbnail_url: 'http://www.aber.ac.uk/staff-profile-assets/img/noimg.png', title: '', description: ''}
-        
-        kwargs = _.merge(defaultOpts, kwargs)
-        
-        if(searchResElem){
-            searchResElem = $(searchResElem)
-            searchResElem.find('p').text(kwargs.description || kwargs.email)
-            searchResElem.find('.media-heading a').text(kwargs.title || kwargs.name)
-            searchResElem.find('img').attr('src', kwargs.thumbnail_url)
-        }else{
-            searchResElem = $(_.template(this.TEMPLATE_SEARCH_RESULT)(kwargs))
+        let defaultOpts = {
+            thumbnail_url: 'http://www.aber.ac.uk/staff-profile-assets/img/noimg.png',
+            title: '',
+            description: ''
         }
         
-        searchResElem.prop('hidden', false)
-        return searchResElem
+        kwargs = _.merge({room: defaultOpts}, kwargs)
+        let prom
+        
+        if (searchResElem) {
+            searchResElem = $(searchResElem)
+            let room = kwargs.room
+            searchResElem.attr('data-roomid', room.id)
+            searchResElem.find('[data-roomdescription]').text(room.description || room.email)
+            searchResElem.find('[data-roomname]').text(room.title || room.name)
+            searchResElem.find('img').attr('src', room.thumbnailUrl)
+            prom = Promise.resolve(searchResElem)
+        } else {
+            prom = this.getTemplate('_result_musicroom.ejs').then((html) => {
+                return $(_.template(html)(kwargs))
+            })
+        }
+        
+        return prom.then((elem) => {
+            elem.prop('hidden', false)
+            return elem
+        })
+        
     }
     
-    static deleteSearchResult(searchResult){
+    deleteSearchResult(searchResult) {
         $(searchResult).prop('hidden', true)
         this._SEARCH_RESULT_POOL.push(searchResult)
     }
     
-    tokensStored(){
+    tokensStored() {
         let tokensString = localStorage.getItem('tokens')
-        if(!tokensString) return {}
-    
+        if (!tokensString) return {}
+        
         let tokens = _.attempt((tokenStr) => JSON.parse(tokenStr), tokensString)
         return (_.isError(tokens)) ? {} : tokens
     }
 }
 
 window.app = new PleiadesApp()
-
-PleiadesApp._SEARCH_RESULT_POOL = []
 
 app.on('server_disconnected', () => {
     console.log('server disconnected')
@@ -161,7 +176,7 @@ app.on('api_connected', () => {
     }
     
     let tokens = app.tokensStored()
-    if(!app.accessToken && 'access' in tokens){
+    if (!app.accessToken && 'access' in tokens) {
         app.accessToken = tokens.access
         app.fetchAuthUser()
             .catch((error) => {
@@ -177,15 +192,18 @@ app.on('submitted_search_room', (term) => {
         .then((resp) => {
             
             $('.search-result-item').each((idx, elem) => {
-                PleiadesApp.deleteSearchResult(elem)
+                app.deleteSearchResult(elem)
             })
             
-            for(let searchResultKwargs of resp.data.results){
-                let elem = PleiadesApp.newSearchResult(searchResultKwargs)
-                
-                switch(searchResultKwargs.$type){
+            console.log('[submitted_search_room]', resp)
+            
+            for (let searchResultKwargs of resp.data.results) {
+                switch (searchResultKwargs.$type) {
                     case 'MusicRoom':
-                        app.elems.searchResultsContainer.append(elem)
+                        app.newSearchResult({room: searchResultKwargs})
+                            .then((elem) => {
+                                app.elems.searchResultsContainer.append(elem)
+                            })
                         break
                 }
                 
@@ -211,7 +229,7 @@ app.on('click_signin', (e) => {
     app.resolveAccess(nickname, passwrd)
         .then((tokens) => {
             app.fetchAuthUser()
-            if(remember) localStorage.setItem('tokens', JSON.stringify(tokens))
+            if (remember) localStorage.setItem('tokens', JSON.stringify(tokens))
             else localStorage.setItem('tokens', '{}')
         })
 })
@@ -225,6 +243,10 @@ app.on('click_create_music_room', (e) => {
     app.create('MusicRoom', {name: roomName, isPublic})
         .then((resp) => {
             console.log('[MusicRoom#create]', resp)
+            return app.fetch('MusicRoom', {where: {id: resp.data.id}, scope: 'withVotingRounds'})
+                .then((res) => {
+                    app.activeTab('view_musicroom', {reload: true, rendered: {room: _.first(res.data) || {}}})
+                })
         })
 })
 
@@ -232,7 +254,7 @@ app.on('click_tab_signin', (e) => {
     let txt = $(e.target).text().trim()
     console.log('[click_tab_signin] text:', txt)
     
-    switch(txt){
+    switch (txt) {
         case 'Sign In':
             return app.activeTab('signin')
         default:
@@ -243,10 +265,10 @@ app.on('click_tab_signin', (e) => {
 
 app.on('changed_authuser', (newUser, oldUser) => {
     console.log('[changed_authuser] newUser=%s, oldUser=%s', newUser, oldUser)
-    app.activeTab('home', {nickname: newUser && newUser.nickname || null})
+    app.activeTab('home', {nickname: newUser && newUser.nickname || null, reload: true})
     $('[data-emit-click="tab_signin"]').text(_.isObject(newUser) ? app.user.nickname : 'Sign In')
     
-    if(!newUser) $('#create_room_btn').hide()
+    if (!newUser) $('#create_room_btn').hide()
     else $('#create_room_btn').show()
     
     app.elems.btnCreateRoom.show()
@@ -269,6 +291,16 @@ app.on('click_song', (e) => {
 
 app.on('click_createRoom', (evt) => {
     console.log("Create room clicked");
+})
+
+app.on('click_view_room', (evt) => {
+    let roomId = $(evt.target).attr('data-roomid')
+    console.log('[click_view_room] %s', roomId)
+    
+    app.fetch('MusicRoom', {where: {id: roomId}, scope: 'withVotingRounds'}).then((res) => {
+        console.log('[res]', res)
+        app.activeTab('view_musicroom', {reload: true, rendered: {room: _.first(res.data) || {}}})
+    })
 })
 
 app.on('click_admin', (e) => {
@@ -327,17 +359,3 @@ app.on('click_show_all_search_result', () => {
 })
 
 app.debugMode = false
-
-PleiadesApp.TEMPLATE_SEARCH_RESULT = `
-    <li class="media search-result-item" data-thumbnail="<%= thumbnail_url %>">
-        <div class="media-left media-middle">
-            <a href="#" data-category="app">
-                <img width="64px" height="64px" style="border-radius: 4px;background-color: aliceblue" class="media-object" src="<%= thumbnail_url %>" alt="product image">
-            </a>
-        </div>
-        <div class="media-body">
-            <h4 class="media-heading"><a href="#"><%= title || name %></a></h4>
-            <p><%= updatedAt %></p>
-        </div>
-    </li>
-`

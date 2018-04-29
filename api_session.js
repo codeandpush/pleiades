@@ -36,10 +36,13 @@ class ApiSession extends ApiSessionHandler {
                     case '/fetch':
                         let model = request.model
                         let where = request.where || {}
+                        let opts = {where: where}
 
                         if (!(model in this.models)) throw new Error(`Unknown model: ${model}`)
-
-                        return this.models[model].findAll({where: where})
+                        
+                        let modelCls = this.models[model]
+                        return (_.isString(request.scope) ? modelCls.scope(request.scope) : modelCls)
+                            .findAll(opts)
                             .then((rooms) => {
                                 return rooms.map((r) => r.toJson())
                             })
@@ -129,10 +132,6 @@ class ApiSession extends ApiSessionHandler {
                         }
                     })
             })
-    }
-
-    onListening() {
-        console.log(`[${this.constructor.name}] seeding database`)
     }
 
 }

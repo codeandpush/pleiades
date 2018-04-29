@@ -1,0 +1,22 @@
+
+<div class="container">
+
+    <h2><%= room.name %></h2>
+    <% for(let [idx, round] of room.votingRounds.entries()) { %>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Round <%= idx + 1 %></h5>
+            <h6 class="card-subtitle mb-2 text-muted">Start time: <%= round.startTime %></h6>
+        </div>
+        <ul class="list-group list-group-flush">
+            <% for(let [voteIdx, vote] of round.votes.entries()) { %>
+            <li class="list-group-item"><%= `${voteIdx + 1}) voterId: ${vote.voterId} | song: ${vote.song.title} | artist: ${vote.song.artistName}` %></li>
+            <% } %>
+        </ul>
+    </div>
+    <% } %>
+
+    <% if(room.votingRounds.length == 0) { %>
+    <h5>No Voting Rounds!</h5>
+    <% } %>
+</div>

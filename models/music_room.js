@@ -14,21 +14,42 @@ class MusicRoom extends DbObject {
         }
     }
     
-    toJson(){
+    static scopeDefs() {
+        const self = this
+        return {
+            withVotingRounds: function () {
+                let models = require('../models')
+                return {
+                    include: [{
+                        model: models.VotingRound,
+                        as: 'votingRounds',
+                        include: {
+                            model: models.Vote,
+                            as: 'votes',
+                            include: [{model: models.Song, as: 'song'}]
+                        }
+                    }]
+                }
+            }
+        }
+    }
+    
+    toJson() {
         let json = super.toJson(...arguments)
         return _.omit(json, 'models')
     }
     
-    get models(){
+    get models() {
         return require('../models').sequelize.models
     }
-
-    addSong(song){
+    
+    addSong(song) {
         return this.models.RoomSong.create({roomId: this.id, songId: song.id})
     }
-
-    getSongs(){
-        let options = {include:[{model: this.models.Song, as: 'song'}],
+    
+    getSongs() {
+        let options = {
+            include: [{model: this.models.Song, as: 'song'}],
             where: {
                 roomId: this.get('id')
             }
@@ -38,19 +59,19 @@ class MusicRoom extends DbObject {
                 return rSongs.map(rs => rs.song)
             })
     }
-
-    static associate(models){
+    
+    static associate(models) {
         // has many rounds
         // has many songs
         // belongs to user
         models.MusicRoom.belongsTo(models.User, {
             foreignKey: 'createdById', as: 'createdBy'
         })
-
+        
         models.MusicRoom.hasMany(models.RoomSong, {
             foreignKey: 'roomId', as: 'roomSongs'
         })
-    
+        
         models.MusicRoom.hasMany(models.VotingRound, {
             foreignKey: 'roomId', as: 'votingRounds'
         })
