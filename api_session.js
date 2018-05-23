@@ -11,7 +11,7 @@ var jwt = require('jwt-simple')
 class ApiSession extends ApiSessionHandler {
 
     static supportedTopics() {
-        return ['/fetch', '/authenticate', '/user', '/search', '/create_model']
+        return ['/fetch', '/authenticate', '/user', '/search', '/create_model', '/grids']
     }
 
     static publicTopics() {
@@ -19,6 +19,9 @@ class ApiSession extends ApiSessionHandler {
     }
 
     onMessage(topic, request, src) {
+        
+        if(src === 'HTTP/OPTIONS') return {send: 'OK'} // CORS
+        
         let accessToken = request.ACCESS_TOKEN || null
         return this.resolveSession(accessToken)
             .catch((e) => {
@@ -31,6 +34,8 @@ class ApiSession extends ApiSessionHandler {
             .then((session) => {
 
                 switch (topic) {
+                    case '/grids':
+                        return {hello: 'api'}
                     case '/user':
                         return this.models.User.findOne({where: {id: session.userId}})
                     case '/fetch':
